@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AlexandreCred",
+  title: "HiperCred",
   description: "Simulação rápida de empréstimo no cartão",
 };
 
