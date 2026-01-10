@@ -4,7 +4,10 @@ import { useState } from "react";
 
 // Formata números em R$
 const formatar = (v: number) =>
-  new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(v);
 
 // Taxas de empréstimo
 const taxas = {
@@ -20,7 +23,6 @@ const taxas = {
 
 type Tipo = keyof typeof taxas;
 type Opcao = keyof typeof taxas["tipo1"];
-type Parcelas = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
 interface Resultado {
   valorLiberado: number;
@@ -28,141 +30,114 @@ interface Resultado {
   parcela: number | null;
 }
 
-// Função de cálculo
 function calcular({ tipo, opcao, valor, parcelas }: { tipo: Tipo, opcao: Opcao, valor: number, parcelas: number }): Resultado {
-  const maxParcelas = Object.keys(taxas[tipo][opcao]).length - 1;
-  const parcelasVal = Math.min(parcelas, maxParcelas) as Parcelas;
+  const taxa = taxas[tipo][opcao][parcelas as keyof typeof taxas[Tipo][Opcao]] / 100;
 
-  const taxa = taxas[tipo][opcao][parcelasVal] / 100;
+  let valorLiberado = opcao === "liberado" ? valor : valor - valor * taxa;
+  let totalPagar = opcao === "liberado" ? valor + valor * taxa : valor;
 
-  let valorLiberado: number;
-  let totalPagar: number;
-
-  if (opcao === "liberado") {
-    valorLiberado = valor;
-    totalPagar = valor + valor * taxa;
-  } else {
-    valorLiberado = valor - valor * taxa;
-    totalPagar = valor;
-  }
-
-  const parcela = parcelasVal > 0 ? totalPagar / parcelasVal : null;
+  const parcela = parcelas > 0 ? totalPagar / parcelas : null;
 
   return { valorLiberado, totalPagar, parcela };
 }
 
-// Função para copiar texto
-function copiarTexto(texto: string) {
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(texto).then(() => alert("Resultado copiado!")).catch(() => fallbackCopy(texto));
-  } else {
-    fallbackCopy(texto);
-  }
-}
-
-function fallbackCopy(texto: string) {
-  const textarea = document.createElement("textarea");
-  textarea.value = texto;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.focus();
-  textarea.select();
-  try { document.execCommand("copy"); alert("Resultado copiado!"); } 
-  catch { alert("Não foi possível copiar o resultado."); }
-  document.body.removeChild(textarea);
-}
-
-// Componente principal
 export default function Calculadora() {
   const [tipo, setTipo] = useState<Tipo>("tipo1");
   const [opcao, setOpcao] = useState<Opcao>("liberado");
-  const [valor, setValor] = useState<string>("");
-  const [parcelas, setParcelas] = useState<number>(1);
+  const [valor, setValor] = useState("");
+  const [parcelas, setParcelas] = useState(1);
   const [res, setRes] = useState<Resultado | null>(null);
 
   const handleCalcular = () => {
-    const numValor = Number(valor);
-    if (isNaN(numValor) || numValor <= 0) { alert("Digite um valor válido"); return; }
-    setRes(calcular({ tipo, opcao, valor: numValor, parcelas }));
+    const num = Number(valor);
+    if (!num || num <= 0) return alert("Digite um valor válido");
+    setRes(calcular({ tipo, opcao, valor: num, parcelas }));
   };
 
   const handleCopiar = () => {
     if (!res) return;
 
-    const tipoCartao = tipo === "tipo1" ? "ELO" : "VISA/Master";
+    const cartao = tipo === "tipo1" ? "ELO" : "VISA/Master";
 
     const texto = `
 =====HiperCred=====
 
-Cartão: ${tipoCartao}
+Cartão: ${cartao}
 Valor Liberado: R$ ${formatar(res.valorLiberado)}
-Prazo: ${parcelas > 0 ? `${parcelas}x` : '-'}
-Parcela: R$ ${res.parcela !== null ? formatar(res.parcela) : '-'}
+Prazo: ${parcelas}x
+Parcela: R$ ${res.parcela ? formatar(res.parcela) : "-"}
 Total a pagar: R$ ${formatar(res.totalPagar)}
-    `;
-    copiarTexto(texto.trim());
+    `.trim();
+
+    navigator.clipboard.writeText(texto);
+    alert("Resultado copiado!");
   };
 
-  const tipoCartaoDisplay = tipo === "tipo1" ? "ELO" : "VISA/Master";
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900 flex items-center justify-center p-6 text-white">
       <div className="w-full max-w-3xl grid md:grid-cols-2 gap-6">
 
-        {/* Painel Entrada */}
-        <div className="bg-zinc-900/70 backdrop-blur rounded-2xl p-6 space-y-4 shadow-xl">
-          <h1 className="text-2xl font-bold text-purple-400">Calculadora HiperCred</h1>
-          <p className="text-sm text-zinc-400">Simulação</p>
+        {/* Entrada */}
+        <div className="bg-blue-900/70 backdrop-blur rounded-2xl p-6 space-y-4 shadow-xl">
+          <h1 className="text-2xl font-bold text-orange-400">Calculadora HiperCred</h1>
+          <p className="text-sm text-blue-200">Simulação de crédito</p>
 
-          <div className="space-y-3">
-            <select className="w-full p-2 rounded bg-zinc-800" value={tipo} onChange={e => setTipo(e.target.value as Tipo)}>
-              <option value="tipo1">ELO</option>
-              <option value="tipo2">VISA/Master</option>
-            </select>
+          <select className="w-full p-2 rounded bg-blue-800" value={tipo} onChange={e => setTipo(e.target.value as Tipo)}>
+            <option value="tipo1">ELO</option>
+            <option value="tipo2">VISA / Master</option>
+          </select>
 
-            <select className="w-full p-2 rounded bg-zinc-800" value={opcao} onChange={e => setOpcao(e.target.value as Opcao)}>
-              <option value="liberado">Liberado</option>
-              <option value="limite">Limite</option>
-            </select>
+          <select className="w-full p-2 rounded bg-blue-800" value={opcao} onChange={e => setOpcao(e.target.value as Opcao)}>
+            <option value="liberado">Liberado</option>
+            <option value="limite">Limite</option>
+          </select>
 
-            <input
-              type="number"
-              className="w-full p-2 rounded bg-zinc-800"
-              value={valor}
-              onChange={e => setValor(e.target.value)}
-              placeholder="Valor do empréstimo"
-            />
+          <input
+            type="number"
+            className="w-full p-2 rounded bg-blue-800"
+            placeholder="Valor"
+            value={valor}
+            onChange={e => setValor(e.target.value)}
+          />
 
-            <select className="w-full p-2 rounded bg-zinc-800" value={parcelas} onChange={e => setParcelas(Number(e.target.value))}>
-              {Array.from({ length: 22 }).map((_, i) => <option key={i} value={i}>{i}x</option>)}
-            </select>
+          <select className="w-full p-2 rounded bg-blue-800" value={parcelas} onChange={e => setParcelas(Number(e.target.value))}>
+            {Array.from({ length: 22 }).map((_, i) => (
+              <option key={i} value={i}>{i}x</option>
+            ))}
+          </select>
 
-            <button className="w-full bg-purple-600 hover:bg-purple-700 transition p-2 rounded font-semibold" onClick={handleCalcular}>
-              Calcular
-            </button>
-          </div>
+          <button
+            onClick={handleCalcular}
+            className="w-full bg-orange-500 hover:bg-orange-600 transition p-2 rounded font-semibold"
+          >
+            Calcular
+          </button>
         </div>
 
-        {/* Painel Resultado */}
-        <div className="bg-zinc-900/70 backdrop-blur rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        {/* Resultado */}
+        <div className="bg-blue-900/70 backdrop-blur rounded-2xl p-6 shadow-xl flex flex-col justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-purple-400 mb-4">Resultado</h2>
+            <h2 className="text-xl font-semibold text-orange-400 mb-4">Resultado</h2>
+
             {res ? (
               <div className="space-y-2 text-sm">
-                <p><span className="text-zinc-400">Cartão:</span> {tipoCartaoDisplay}</p>
-                <p><span className="text-zinc-400">Valor Liberado:</span> R$ {formatar(res.valorLiberado)}</p>
-                <p><span className="text-zinc-400">Prazo:</span> {parcelas > 0 ? `${parcelas}x` : '-'}</p>
-                <p><span className="text-zinc-400">Parcela:</span> R$ {res.parcela !== null ? formatar(res.parcela) : '-'}</p>
-                <p className="text-lg font-bold"><span className="text-zinc-400">Total a pagar:</span> R$ {formatar(res.totalPagar)}</p>
+                <p>Valor Liberado: <strong>R$ {formatar(res.valorLiberado)}</strong></p>
+                <p>Prazo: {parcelas}x</p>
+                <p>Parcela: R$ {res.parcela ? formatar(res.parcela) : "-"}</p>
+                <p className="text-lg font-bold">
+                  Total a pagar: R$ {formatar(res.totalPagar)}
+                </p>
               </div>
             ) : (
-              <p className="text-zinc-500">Preencha os dados para calcular</p>
+              <p className="text-blue-200">Preencha os dados para calcular</p>
             )}
           </div>
 
           {res && (
-            <button className="mt-4 border border-dashed border-purple-500 text-purple-400 p-2 rounded" onClick={handleCopiar}>
+            <button
+              onClick={handleCopiar}
+              className="mt-4 border border-dashed border-orange-400 text-orange-300 p-2 rounded"
+            >
               Copiar Resultado
             </button>
           )}
