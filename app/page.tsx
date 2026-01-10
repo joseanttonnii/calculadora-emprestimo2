@@ -93,7 +93,7 @@ export default function Calculadora() {
     const tipoCartao = tipo === "tipo1" ? "ELO" : "VISA/Master";
 
     const texto = `
-=====AlexandreCred=====
+=====HiperCred=====
 
 Cartão: ${tipoCartao}
 Valor Liberado: R$ ${formatar(res.valorLiberado)}
@@ -112,8 +112,8 @@ Total a pagar: R$ ${formatar(res.totalPagar)}
 
         {/* Painel Entrada */}
         <div className="bg-zinc-900/70 backdrop-blur rounded-2xl p-6 space-y-4 shadow-xl">
-          <h1 className="text-2xl font-bold text-purple-400">Calculadora de Empréstimo</h1>
-          <p className="text-sm text-zinc-400">Simulação AlexandreCred</p>
+          <h1 className="text-2xl font-bold text-purple-400">Calculadora HiperCred</h1>
+          <p className="text-sm text-zinc-400">Simulação</p>
 
           <div className="space-y-3">
             <select className="w-full p-2 rounded bg-zinc-800" value={tipo} onChange={e => setTipo(e.target.value as Tipo)}>
