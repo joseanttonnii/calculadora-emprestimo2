@@ -57,7 +57,7 @@ export default function Calculadora() {
   const handleCopiar = () => {
     if (!res) return;
 
-    const cartao = tipo === "tipo1" ? "VISA/MASTER" : "ELO/HIPER";
+    const cartao = tipo === "tipo1" ? "VISA/MASTER" : "ELO/OUTROS";
 
     const texto = `
 =====Simulador HiperCred=====
@@ -84,7 +84,7 @@ Total a pagar: R$ ${formatar(res.totalPagar)}
 
           <select className="w-full p-2 rounded bg-blue-800" value={tipo} onChange={e => setTipo(e.target.value as Tipo)}>
             <option value="tipo1">VISA/MASTER</option>
-            <option value="tipo2">ELO/HIPER</option>
+            <option value="tipo2">ELO/OUTROS</option>
           </select>
 
           <select className="w-full p-2 rounded bg-blue-800" value={opcao} onChange={e => setOpcao(e.target.value as Opcao)}>
