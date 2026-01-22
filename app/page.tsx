@@ -91,7 +91,8 @@ export default function CalculadoraHiperCred() {
           {/* 1. Entrada */}
           <div className="bg-blue-900/10 rounded-2xl p-8 border border-blue-900/20 shadow-xl flex flex-col min-h-[520px]">
             <div className="flex items-center gap-4 mb-8">
-              <div className="bg-orange-600 p-3 rounded-xl shrink-0 shadow-lg text-white font-black text-xl">HC</div>
+              {/* Logo adicionada aqui */}
+              <img src="/logo.png" alt="Logo" className="w-12 h-12 object-contain shrink-0" />
               <div>
                 <h1 className="text-xl font-bold text-orange-500 leading-tight">Simulador</h1>
                 <p className="text-zinc-500 text-[10px] uppercase tracking-widest">HiperCred</p>
